@@ -1,10 +1,17 @@
-// const GET_ENDPOINT = 'https://dz641clwp6.execute-api.eu-west-1.amazonaws.com/default/aws-intro-weather-app-get-params';
+const { ENDPOINT_PLACE_ORDER } = require('../../creds.js');
 
-// module.exports = {
-//   async get() {
-//     const rawData = await fetch(GET_ENDPOINT);
-//     const data = await rawData.json();
+module.exports = {
+  async placeOrder(name, email) {
+    const data = await fetch(ENDPOINT_PLACE_ORDER, {
+      method: 'POST',
+      body: JSON.stringify({ name, email }),
+    });
 
-//     console.log(data);
-//   },
-// };
+    const { status } = data;
+    const { orderNumber } = await data.json();
+    // const { status, body: { orderNumber } } =
+    // { statusCode: 200, body: { orderNumber: '2837asd47' } };
+
+    return { status, orderNumber };
+  },
+};

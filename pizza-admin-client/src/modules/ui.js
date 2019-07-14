@@ -1,4 +1,4 @@
-const { ENDPOINT_REQUESTS } = require('../../creds.js');
+const { getOrders, completeOrder } = require('./api');
 
 const root = document.querySelector('.container');
 
@@ -6,70 +6,23 @@ module.exports = {
   listen() {
     root.addEventListener('click', async (event) => {
       if (event.target.type === 'checkbox') {
-        // const data = await fetch(ENDPOINT_COMPLETE_REQUEST, {
-        //   method: 'POST',
-        //   mode: 'cors',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({ id }),
-        // });
-        const { statusCode, body: { message } } = { statusCode: 200, body: { message: 'Something goes good' } }; // await data.json();
-        event.target.parentNode.parentNode.classList.toggle('table__row_completed');
+        const { id } = event.target.dataset;
+        const isCompleted = event.target.checked;
 
-        window.console.log(`${statusCode}: ${message}`);
+        const { status, message } = await completeOrder(id, isCompleted);
+
+        event.target.parentNode.parentNode.classList.toggle('table__row_completed');
+        window.console.log(`${status}: ${message}`);
       }
     });
   },
   async render() {
-    const data = await fetch(ENDPOINT_REQUESTS);
-
-    // const { status } = { status: 400 };
-    const { status } = data;
+    const { status, orders } = await getOrders();
 
     if (status !== 200) {
       root.insertAdjacentHTML('afterBegin', `<p class="container__message container__message_error">${status}: Something went wrong!</p>`);
       return;
     }
-
-    // const orders = [
-    //   {
-    //     id: '100asd3',
-    //     name: 'Nikolay',
-    //     email: 'nikolay@gmail.com',
-    //     isCompleted: true,
-    //     isCancelled: false,
-    //   },
-    //   {
-    //     id: '134df45',
-    //     name: 'Mike',
-    //     email: 'mike@gmail.com',
-    //     isCompleted: true,
-    //     isCancelled: false,
-    //   },
-    //   {
-    //     id: 'asd44dc',
-    //     name: 'Pavel',
-    //     email: 'pavel@gmail.com',
-    //     isCompleted: false,
-    //     isCancelled: false,
-    //   },
-    //   {
-    //     id: 'f5ddf34',
-    //     name: 'Alexey',
-    //     email: 'alexey@gmail.com',
-    //     isCompleted: false,
-    //     isCancelled: true,
-    //   },
-    //   {
-    //     id: 'cvvrr34',
-    //     name: 'Nikita',
-    //     email: 'nikita@gmail.com',
-    //     isCompleted: false,
-    //     isCancelled: true,
-    //   },
-    // ];
-    const { orders } = await data.json();
 
     const ordersHtml = orders.map(({
       id,
@@ -83,7 +36,7 @@ module.exports = {
         <td class="table__cell">${name}</td>
         <td class="table__cell">${email}</td>
         <td class="table__cell cell table__cell_with-checkbox">
-          <input class="cell__checkbox" type="checkbox" ${isCompleted ? 'checked' : ''} ${isCancelled ? 'hidden' : ''}/>
+          <input class="cell__checkbox" type="checkbox" ${isCompleted ? 'checked' : ''} ${isCancelled ? 'hidden' : ''} data-id="${id}" />
         </td>
       </tr>
     `).join('');

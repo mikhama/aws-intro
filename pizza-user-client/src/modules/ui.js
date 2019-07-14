@@ -1,4 +1,5 @@
-const { ENDPOINT_CANCEL_ORDER } = require('../../creds.js');
+const { ENDPOINT_CANCEL_ORDER } = require('../../creds');
+const { placeOrder } = require('./api');
 
 const root = document.querySelector('.container');
 
@@ -31,7 +32,7 @@ const compileMessage = (err, order, client) => {
     </p>
     <p class="container__message">
       You can cancel the order by clicking on
-      <a href="${ENDPOINT_CANCEL_ORDER}">the link</a>
+      <a href="${ENDPOINT_CANCEL_ORDER}/orderNumber=${orderNumber}">the link</a>
       while your order is not ready yet.
     </p>
   </div>`;
@@ -69,27 +70,17 @@ module.exports = {
 
         const { name, email } = getValuesFromFields();
 
-        // const data = await fetch(ENDPOINT, {
-        //   method: 'POST',
-        //   mode: 'cors',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({ name, email }),
-        // });
-        const { statusCode, body: { orderNumber } } = { statusCode: 200, body: { orderNumber: '2837asd47' } }; // await data.json();
+        const { status, orderNumber } = await placeOrder(name, email);
 
         let message;
-        if (statusCode === 200) {
+        if (status === 200) {
           message = compileMessage(null, { orderNumber }, { name, email });
         } else {
-          message = compileMessage(statusCode);
+          message = compileMessage(status);
         }
 
         clear();
         renderMessage(message);
-
-        console.log('TODO: I want to be able to order a pizza!');
       }
     });
   },
