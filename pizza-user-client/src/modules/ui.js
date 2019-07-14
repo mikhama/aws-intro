@@ -32,7 +32,7 @@ const compileMessage = (err, order, client) => {
     </p>
     <p class="container__message">
       You can cancel the order by clicking on
-      <a href="${ENDPOINT_CANCEL_ORDER}/orderNumber=${orderNumber}">the link</a>
+      <a href="${ENDPOINT_CANCEL_ORDER}?orderNumber=${orderNumber}">the link</a>
       while your order is not ready yet.
     </p>
   </div>`;
