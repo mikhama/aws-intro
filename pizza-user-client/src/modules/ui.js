@@ -1,4 +1,5 @@
-const { ENDPOINT_CANCEL_ORDER } = require('../../creds');
+// const { ENDPOINT_CANCEL_ORDER } = require('../../creds');
+const ENDPOINT = require('../../creds');
 const { placeOrder } = require('./api');
 
 const root = document.querySelector('.container');
@@ -32,10 +33,11 @@ const compileMessage = (err, order, client) => {
     </p>
     <p class="container__message">
       You can cancel the order by clicking on
-      <a href="${ENDPOINT_CANCEL_ORDER}?orderNumber=${orderNumber}">the link</a>
+      <a href="${ENDPOINT}/${orderNumber}">the link</a>
       while your order is not ready yet.
     </p>
   </div>`;
+  // <a href="${ENDPOINT}?orderNumber=${orderNumber}">the link</a>
 };
 
 const renderMessage = (message) => {

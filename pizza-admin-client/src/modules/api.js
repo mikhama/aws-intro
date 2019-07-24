@@ -1,8 +1,10 @@
-const { ENDPOINT_ORDERS, ENDPOINT_COMPLETE_ORDER } = require('../../creds.js');
+// const { ENDPOINT_ORDERS, ENDPOINT_COMPLETE_ORDER } = require('../../creds.js');
+const ENDPOINT = require('../../creds.js');
 
 module.exports = {
   async getOrders() {
-    const data = await fetch(ENDPOINT_ORDERS);
+    // const data = await fetch(ENDPOINT_ORDERS);
+    const data = await fetch(ENDPOINT);
 
     // const { status } = { status: 400 };
     const { status } = data;
@@ -50,8 +52,9 @@ module.exports = {
   },
 
   async completeOrder(id, isCompleted) {
-    const data = await fetch(ENDPOINT_COMPLETE_ORDER, {
-      method: 'POST',
+    // const data = await fetch(ENDPOINT_COMPLETE_ORDER, {
+    const data = await fetch(ENDPOINT, {
+      method: 'PUT',
       body: JSON.stringify({ id, isCompleted }),
     });
 

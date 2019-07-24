@@ -1,0 +1,148 @@
+service:
+  name: pizza-serverless-backend
+
+frameworkVersion: '>=1.0.0 <2.0.0'
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: dev
+  region: eu-west-1
+  environment:
+    TABLE_NAME: ${self:custom.tableName}
+
+plugins:
+  - serverless-step-functions
+  - serverless-pseudo-parameters
+
+custom:
+  tableName: pizza-orders-${self:provider.stage}
+  stateMachineName: notify-when-user-subscribed-${self:provider.stage}
+  stateMachineArn: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:${self:custom.stateMachineName}
+  adminEmail: mikhama@tut.by
+
+functions:
+  getOrders:
+    handler: src/handler.getOrders
+    events:
+      - http:
+          path: orders
+          method: get
+          cors: true
+
+  placeOrder:
+    handler: src/handler.placeOrder
+    events:
+      - http:
+          path: orders
+          method: post
+          cors: true
+    environment:
+      STATE_MACHINE_ARN: ${self:custom.stateMachineArn}
+      ADMIN_EMAIL: ${self:custom.adminEmail}
+
+  completeOrder:
+    handler: src/handler.completeOrder
+    events:
+      - http:
+          path: orders
+          method: put
+          cors: true
+    environment:
+      STATE_MACHINE_ARN: ${self:custom.stateMachineArn}
+
+  notifyUser:
+    handler: src/handler.notifyUser
+
+  cancelOrder:
+    handler: src/handler.cancelOrder
+    events:
+      - http:
+          path: orders/{orderNumber}
+          method: get
+          cors: true
+    environment:
+      STATE_MACHINE_ARN: ${self:custom.stateMachineArn}
+
+  subscribeUser:
+    handler: src/handler.subscribeUser
+    environment:
+      PROTOCOL: email
+
+  isUserSubscribed:
+    handler: src/handler.isUserSubscribed
+
+stepFunctions:
+  stateMachines:
+    pizzaOrdersStateMachine:
+      name: ${self:custom.stateMachineName}
+      definition:
+        Comment: "This state machine sends notification to user"
+        StartAt: subscribeUser
+        States:
+          subscribeUser:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-subscribeUser
+            Next: isUserSubscribed
+          isUserSubscribed:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-isUserSubscribed
+            Next: ChoiceState
+          notifyUser:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${self:provider.stage}-notifyUser
+            End: true
+          ChoiceState:
+            Type: Choice
+            Choices:
+            - Variable: '$.isUserSubscribed'
+              BooleanEquals: true
+              Next: notifyUser
+            Default: Pause
+          Pause:
+            Type: Wait
+            Seconds: 120
+            Next: isUserSubscribed
+
+resources:
+  Resources:
+    pizzaOrdersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    serviceIamPolicy:
+      Type: AWS::IAM::Policy
+      Properties:
+        PolicyName: ${self:service}-policy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:Scan
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+              Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/${self:custom.tableName}
+            - Effect: Allow
+              Action:
+                - states:StartExecution
+              Resource: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:${self:custom.stateMachineName}
+            - Effect: Allow
+              Action:
+                - SNS:Publish
+                - SNS:CreateTopic
+                - SNS:ListSubscriptions
+                - SNS:Subscribe
+              Resource: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:*
+        Roles:
+          - Ref: IamRoleLambdaExecution

@@ -1,0 +1,21 @@
+{
+  "name": "pizza-serverless-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/handler.js",
+  "author": "Dzmitry Tsebruk",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint ./src/",
+    "deploy": "serverless deploy"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.496.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-plugin-import": "^2.18.2",
+    "serverless-pseudo-parameters": "^2.4.0",
+    "serverless-step-functions": "^2.1.0"
+  },
+  "dependencies": {}
+}

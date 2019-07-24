@@ -1,8 +1,10 @@
-const { ENDPOINT_PLACE_ORDER } = require('../../creds.js');
+// const { ENDPOINT_PLACE_ORDER } = require('../../creds.js');
+const ENDPOINT = require('../../creds.js');
 
 module.exports = {
   async placeOrder(name, email) {
-    const data = await fetch(ENDPOINT_PLACE_ORDER, {
+    // const data = await fetch(ENDPOINT_PLACE_ORDER, {
+    const data = await fetch(ENDPOINT, {
       method: 'POST',
       body: JSON.stringify({ name, email }),
     });
