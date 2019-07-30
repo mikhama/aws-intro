@@ -6,7 +6,7 @@ frameworkVersion: '>=1.0.0 <2.0.0'
 provider:
   name: aws
   runtime: nodejs10.x
-  stage: dev
+  stage: ${opt:stage}
   region: eu-west-1
   environment:
     TABLE_NAME: ${self:custom.tableName}
@@ -19,7 +19,7 @@ custom:
   tableName: pizza-orders-${self:provider.stage}
   stateMachineName: notify-when-user-subscribed-${self:provider.stage}
   stateMachineArn: arn:aws:states:#{AWS::Region}:#{AWS::AccountId}:stateMachine:${self:custom.stateMachineName}
-  adminEmail: mikhama@tut.by
+  adminEmail: ${opt:adminEmail}
 
 functions:
   getOrders:
@@ -142,6 +142,7 @@ resources:
                 - SNS:Publish
                 - SNS:CreateTopic
                 - SNS:ListSubscriptions
+                - SNS:ListSubscriptionsByTopic
                 - SNS:Subscribe
               Resource: arn:aws:sns:#{AWS::Region}:#{AWS::AccountId}:*
         Roles:

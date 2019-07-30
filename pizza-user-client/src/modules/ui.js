@@ -1,4 +1,3 @@
-// const { ENDPOINT_CANCEL_ORDER } = require('../../creds');
 const ENDPOINT = require('../../creds');
 const { placeOrder } = require('./api');
 
@@ -37,7 +36,6 @@ const compileMessage = (err, order, client) => {
       while your order is not ready yet.
     </p>
   </div>`;
-  // <a href="${ENDPOINT}?orderNumber=${orderNumber}">the link</a>
 };
 
 const renderMessage = (message) => {

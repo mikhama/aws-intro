@@ -112,7 +112,6 @@ exports.notifyUser = async (event) => {
 
 exports.cancelOrder = async (event) => {
   try {
-    // const { orderNumber } = event.queryStringParameters;
     const { orderNumber } = event.pathParameters;
     const { Attributes } = await documentClient.update({
       TableName: TABLE_NAME,
@@ -151,9 +150,9 @@ exports.subscribeUser = async (event) => {
     Name: topicName,
   }).promise();
 
-  const { Subscriptions } = await sns.listSubscriptions().promise();
+  const { Subscriptions } = await sns.listSubscriptionsByTopic({ TopicArn }).promise();
 
-  if (!Subscriptions.find(item => item.Endpoint === endpoint)) {
+  if (!Subscriptions.find(item => (item.Endpoint === endpoint) && item.SubscriptionArn !== 'Deleted')) {
     await sns.subscribe({
       TopicArn,
       Endpoint: endpoint,
@@ -169,12 +168,13 @@ exports.subscribeUser = async (event) => {
 
 exports.isUserSubscribed = async (event) => {
   const { endpoint, topicArn } = event;
-  const { Subscriptions } = await sns.listSubscriptions().promise();
+  const { Subscriptions } = await sns.listSubscriptionsByTopic({ TopicArn: topicArn }).promise();
 
   const isUserSubscribed = !!Subscriptions.find(
     item => (item.Endpoint === endpoint)
     && (item.TopicArn === topicArn)
-    && (item.SubscriptionArn !== 'PendingConfirmation'),
+    && (item.SubscriptionArn !== 'PendingConfirmation')
+    && (item.SubscriptionArn !== 'Deleted'),
   );
 
   return {

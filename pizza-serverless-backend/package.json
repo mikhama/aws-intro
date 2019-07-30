@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./src/",
-    "deploy": "serverless deploy"
+    "deploy": "sh deploy.sh"
   },
   "devDependencies": {
     "aws-sdk": "^2.496.0",
