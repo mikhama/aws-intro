@@ -1,10 +1,13 @@
+const { getOrders, completeOrder } = require('./api');
+
 const root = document.querySelector('.container');
 
 module.exports = {
   listen() {
     root.addEventListener('click', async (event) => {
       if (event.target.type === 'checkbox') {
-        const { status, body: { message } } = { status: 200, body: { message: 'Something goes good' } };
+        const id = event.target.parentNode.parentNode.children[0].innerHTML;
+        const { status, message } = await completeOrder(id);
         event.target.parentNode.parentNode.classList.toggle('table__row_completed');
 
         window.console.log(`${status}: ${message}`);
@@ -12,49 +15,15 @@ module.exports = {
     });
   },
   async render() {
-    const { status } = { status: 200 };
+    const data = await getOrders();
+    const { status } = data;
 
     if (status !== 200) {
       root.insertAdjacentHTML('afterBegin', `<p class="container__message container__message_error">${status}: Something went wrong!</p>`);
       return;
     }
-    const orders = [
-      {
-        id: '100asd3',
-        name: 'Nikolay',
-        email: 'nikolay@gmail.com',
-        isCompleted: true,
-        isCancelled: false,
-      },
-      {
-        id: '134df45',
-        name: 'Mike',
-        email: 'mike@gmail.com',
-        isCompleted: true,
-        isCancelled: false,
-      },
-      {
-        id: 'asd44dc',
-        name: 'Pavel',
-        email: 'pavel@gmail.com',
-        isCompleted: false,
-        isCancelled: false,
-      },
-      {
-        id: 'f5ddf34',
-        name: 'Alexey',
-        email: 'alexey@gmail.com',
-        isCompleted: false,
-        isCancelled: true,
-      },
-      {
-        id: 'cvvrr34',
-        name: 'Nikita',
-        email: 'nikita@gmail.com',
-        isCompleted: false,
-        isCancelled: true,
-      },
-    ];
+
+    const { orders } = data;
 
     const ordersHtml = orders.map(({
       id,

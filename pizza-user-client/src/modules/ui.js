@@ -1,3 +1,7 @@
+const { placeOrder } = require('./api');
+
+const CANCEL_URL = '';
+
 const root = document.querySelector('.container');
 
 const FORM_ID = 'form';
@@ -9,12 +13,12 @@ const clear = () => {
   root.innerHTML = '';
 };
 
-const compileMessage = (err, order, client) => {
+const compileMessage = (err, order = {}, client = {}) => {
   if (err) {
     return `<p class="container__message container__message_error">${err}: Error has occured!<p>`;
   }
 
-  const { orderNumber } = order;
+  const { orderNumber = '' } = order;
   const { name, email } = client;
 
   return `<div>
@@ -29,7 +33,7 @@ const compileMessage = (err, order, client) => {
     </p>
     <p class="container__message">
       You can cancel the order by clicking on
-      <a href="#">the link</a>
+      <a href="${CANCEL_URL}/?id=${orderNumber}">the link</a>
       while your order is not ready yet.
     </p>
   </div>`;
@@ -67,19 +71,17 @@ module.exports = {
 
         const { name, email } = getValuesFromFields();
 
-        const { statusCode, body: { orderNumber } } = { statusCode: 200, body: { orderNumber: '2837asd47' } };
+        const { status, orderNumber = '' } = await placeOrder(name, email);
 
         let message;
-        if (statusCode === 200) {
+        if (status === 200) {
           message = compileMessage(null, { orderNumber }, { name, email });
         } else {
-          message = compileMessage(statusCode);
+          message = compileMessage(status);
         }
 
         clear();
         renderMessage(message);
-
-        console.log('TODO: I want to be able to order a pizza!');
       }
     });
   },
