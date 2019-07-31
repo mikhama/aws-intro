@@ -1,5 +1,3 @@
-const { ENDPOINT_CANCEL_ORDER } = require('../../creds.js');
-
 const root = document.querySelector('.container');
 
 const FORM_ID = 'form';
@@ -31,7 +29,7 @@ const compileMessage = (err, order, client) => {
     </p>
     <p class="container__message">
       You can cancel the order by clicking on
-      <a href="${ENDPOINT_CANCEL_ORDER}">the link</a>
+      <a href="#">the link</a>
       while your order is not ready yet.
     </p>
   </div>`;
@@ -69,15 +67,7 @@ module.exports = {
 
         const { name, email } = getValuesFromFields();
 
-        // const data = await fetch(ENDPOINT, {
-        //   method: 'POST',
-        //   mode: 'cors',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify({ name, email }),
-        // });
-        const { statusCode, body: { orderNumber } } = { statusCode: 200, body: { orderNumber: '2837asd47' } }; // await data.json();
+        const { statusCode, body: { orderNumber } } = { statusCode: 200, body: { orderNumber: '2837asd47' } };
 
         let message;
         if (statusCode === 200) {
